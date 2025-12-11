@@ -1,67 +1,124 @@
-# resume-assumption-n8n-workflow
+# Resume Assumption / Resume Parser Automation (n8n Workflow)
 
-Resume Parser Automation Workflow (n8n)
-This n8n workflow automatically processes incoming resumes sent via email, extracts key information using Google Gemini AI, and logs the parsed details into a Google Sheet while archiving the original file in Google Drive.
+This n8n workflow automatically processes incoming resumes from Gmail, extracts important candidate details using Google Gemini AI, logs structured data into Google Sheets, and archives all resumes into Google Drive.
 
-📌 Overview
-Trigger: Monitors your Gmail INBOX for new emails every minute.
-Filter: Only processes emails that contain at least one attachment with a .pdf, .docx, or .doc extension.
-Processing:
-Downloads the email and its attachments.
-Uploads the original resume file to a Google Drive folder.
-Extracts text from the resume:
-PDFs → parsed via built-in PDF extractor.
-DOC/DOCX → parsed via plain-text extractor.
-Sends the extracted text to Google Gemini (models/gemini-2.5-flash) with a structured prompt to extract:
-Full Name
-Email Address
-Phone Number (formatted as (+91) XXXXXXXXXX)
-Skills (as a comma-separated list)
-Output: Parsed data is appended or updated in a Google Sheet, using Email as the unique identifier to avoid duplicates.
-🔧 Requirements
-Credentials (configured in n8n):
-Gmail OAuth2 – to read incoming emails and download attachments.
-Google Drive OAuth2 – to upload and store resume files.
-Google Sheets OAuth2 – to write parsed data.
-Google Gemini (PaLM) API – for AI-powered resume parsing.
-External Resources:
-Google Sheet:
-ID: 1WUyyc29MUyO-YswMQCYzN_EnxGd4oNSEqQGymgMHWtA
-Tab: Sheet1
-Columns: Name, Email, Number, Skills
-Google Drive Folder:
-ID: 1v5cNVzonziPZFoGqWL-OGSgsCf0LW0N4
-(Named "Resume")
-💡 Ensure all credentials and external resources are accessible to the n8n instance. 
+---
 
-🔄 Workflow Flow
+## Overview
+
+### Trigger
+- Checks Gmail INBOX every minute.
+- Processes only emails that contain at least one attachment with:
+  - .pdf
+  - .docx
+  - .doc
+
+---
+
+## Workflow Steps
+
+### 1. Email Processing
+- Downloads the email.
+- Reads all attachments.
+- Filters required formats.
+
+### 2. File Handling
+- Uploads resume file to Google Drive (Resume folder).
+- Extracts text depending on file type:
+  - PDF → PDF text extractor
+  - DOC/DOCX → plain text extractor
+
+### 3. AI Processing (Google Gemini)
+Extracted text is sent to Gemini (models/gemini-2.5-flash) to extract:
+- Full Name  
+- Email Address  
+- Phone Number formatted as (+91) XXXXXXXXXX  
+- Skills (comma-separated)
+
+### 4. Data Storage
+- Parsed data is added or updated in a Google Sheet.
+- Uses Email as the unique key to avoid duplicates.
+
+---
+
+## External Resources Used
+
+### Google Sheet
+- ID: 1WUyyc29MUyO-YswMQCYzN_EnxGd4oNSEqQGymgMHWtA  
+- Tab: Sheet1  
+- Columns: Name, Email, Number, Skills  
+
+### Google Drive Folder
+- ID: 1v5cNVzonziPZFoGqWL-OGSgsCf0LW0N4  
+- Folder Name: Resume
+
+---
+
+## Required Credentials (configured in n8n)
+
+- Gmail OAuth2 (read emails, download attachments)  
+- Google Drive OAuth2 (upload files)  
+- Google Sheets OAuth2 (write data)  
+- Google Gemini API (AI extraction)
+
+---
+
+## Workflow Flow Diagram
+
+```mermaid
 graph LR
-A[Gmail Trigger] --> B[Get a message]
+A[Gmail Trigger] --> B[Get a Message]
 B --> C{Has .pdf/.doc/.docx?}
 C -->|Yes| D{Is PDF?}
 D -->|Yes| E[Extract from File (PDF)]
 D -->|No| F[Extract from File (DOC/DOCX)]
-E --> G[Upload to Drive]
+E --> G[Upload to Google Drive]
 F --> G
-E --> H[Message a model (Gemini)]
+E --> H[Message a Model (Gemini)]
 F --> H
 H --> I[Edit Fields]
 I --> J[Append/Update Google Sheet]
-⚠️ Notes & Assumptions
-Phone Formatting: Assumes Indian numbers; strips all non-digits and prefixes with (+91), keeping the last 10 digits.
-Filename Handling: Only processes the first attachment (attachment_0). Additional attachments are ignored.
-AI Output: Relies on Gemini returning valid JSON. Invalid responses may cause errors in the Edit Fields node.
-Error Handling: Not explicitly implemented—consider adding error workflows for production use.
-🛠️ Customization
-To adapt this workflow:
+```
 
-Change the Gmail label or polling frequency in the Gmail Trigger.
-Modify the Gemini prompt to extract different fields.
-Adjust phone formatting logic for other countries.
-Add duplicate detection beyond email (e.g., name + phone).
-✅ Use Case
-Ideal for HR teams or recruiters who receive resumes via email and want to:
+---
 
-Automatically archive submissions.
-Build a structured candidate database in Google Sheets.
-Reduce manual data entry.
+## Notes and Assumptions
+
+- Phone numbers are formatted using Indian standard:
+  - Remove non-digits
+  - Keep last 10 digits
+  - Prefix with (+91)
+- Only the first attachment (attachment_0) is processed.
+- Assumes Gemini returns valid JSON.
+- No error-handling nodes included.
+
+---
+
+## Customization
+
+- Change Gmail trigger label or frequency.
+- Modify Gemini prompt to extract more fields.
+- Adjust phone formatting for other countries.
+- Add duplicate detection logic.
+- Add error handling.
+
+---
+
+## Ideal Use Case
+
+Useful for:
+- HR teams  
+- Recruiters  
+- Automated hiring systems  
+
+Helps to:
+- Automatically archive resumes
+- Build structured candidate databases
+- Reduce manual work
+
+---
+
+If you need, I can also generate:
+- Full n8n JSON workflow  
+- Gemini prompt  
+- Error-handling workflow  
