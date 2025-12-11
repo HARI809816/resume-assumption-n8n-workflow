@@ -65,7 +65,7 @@ Extracted text is sent to Gemini (models/gemini-2.5-flash) to extract:
 
 ## Workflow Flow Diagram
 
-```mermaid
+
 graph LR
 A[Gmail Trigger] --> B[Get a Message]
 B --> C{Has .pdf/.doc/.docx?}
@@ -78,7 +78,6 @@ E --> H[Message a Model (Gemini)]
 F --> H
 H --> I[Edit Fields]
 I --> J[Append/Update Google Sheet]
-```
 
 ---
 
